@@ -2,7 +2,7 @@
 
 Java 17 · Maven · TestNG · Selenium 4 · Rest Assured · Apache POI · ExtentReports
 
-UI tests run against https://www.saucedemo.com. API tests run against two free public APIs:
+UI tests run against https://www.saucedemo.com (shop login / cart) and https://the-internet.herokuapp.com (one page per UI scenario). API tests run against two free public APIs:
 https://jsonplaceholder.typicode.com (fake writes) and https://restful-booker.herokuapp.com (really stores data). Change the URLs in `src/main/resources/config.properties` to point at your own app.
 
 ## Requirements
@@ -16,6 +16,7 @@ mvn clean test                                          # full suite: Chrome + F
 mvn clean test -Dheadless=true                          # same, headless (good for CI)
 mvn clean test -DsuiteXmlFile=testng-api.xml            # API tests only (no browser needed)
 mvn clean test -DsuiteXmlFile=testng-ui-chrome.xml      # UI tests on Chrome only
+mvn clean test -DsuiteXmlFile=testng-practice.xml -Dheadless=true   # the-internet scenarios only, Chrome
 mvn clean test -Dgroups=smoke                           # run one TestNG group
 mvn clean test -Dgrid.url=http://localhost:4444         # run browsers on Selenium Grid / Selenoid / cloud
 ```
@@ -32,6 +33,7 @@ src/main/java/com/framework
   driver/DriverManager       ThreadLocal<WebDriver> (parallel safe)
   pages/BasePage             waits + common actions
   pages/LoginPage, InventoryPage      page objects (one class per page)
+  pages/practice/*           page objects for the-internet.herokuapp.com (one per scenario)
   api/ApiClient              Rest Assured wrapper (GET/POST/PUT/PATCH/DELETE)
   api/ExtentRestAssuredFilter  logs every request/response into the report
   api/models/Post, Booking, BookingDates   request/response bodies as Java records (Jackson)
@@ -42,6 +44,7 @@ src/main/java/com/framework
 src/test/java/com/framework
   dataproviders/DataProviders   one provider per Excel sheet
   tests/ui/BaseTest, LoginTests, CartTests
+  tests/ui/practice/*        FormInteractionTests, BrowserHandlingTests, DynamicContentTests, MouseActionTests, TablesAndNavigationTests
   tests/api/PostsApiTests        JSONPlaceholder: GET (list, by id, query param, nested, 404), POST, PUT, PATCH, DELETE
   tests/api/BookingApiTests      Restful Booker end-to-end CRUD: auth token -> create -> read -> search -> PUT -> PATCH -> DELETE
   tests/api/ExcelDrivenApiTests  one test per row of the ApiData sheet
@@ -65,6 +68,23 @@ testng.xml                   cross-browser parallel suite
 - `Run` column: set to `N` to skip a row.
 - Sheet names: `LoginData`, `CartData`, `ApiData` (see `DataProviders`).
 - API rows: `Method, Endpoint, RequestBody, ExpectedStatus, ExpectedField (JSON path), ExpectedValue`.
+
+## UI scenarios (the-internet.herokuapp.com)
+
+A free practice site with one page per UI behaviour. Set `practice.base.url` in `config.properties` to change it.
+
+| Class | Scenarios |
+|---|---|
+| `FormInteractionTests` | login / logout, data-driven invalid logins, checkboxes, dropdown (`Select`), keyboard keys, slider, file upload |
+| `BrowserHandlingTests` | JS alert / confirm / prompt, nested frames, multiple windows, HTTP Basic Auth, right-click |
+| `DynamicContentTests` | dynamic loading (hidden vs. not-yet-in-DOM element), Ajax enable / remove, add / remove elements, infinite scroll |
+| `MouseActionTests` | hover, drag and drop |
+| `TablesAndNavigationTests` | link navigation and back, read / sort a table, shadow DOM |
+
+Each scenario has its own page object in `pages/practice`, so a test reads as user steps. Not covered: file download
+(needs browser download-folder settings) and the TinyMCE iframe page (needs an API key).
+
+The practice site is shared and sometimes slow; if a run fails with timeouts or `ERR_` network errors, run it again.
 
 ## API tests
 

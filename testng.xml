@@ -11,26 +11,27 @@
 
     <listeners>
         <listener class-name="com.framework.listeners.TestListener"/>
+        <listener class-name="com.framework.listeners.RetryTransformer"/>
     </listeners>
 
     <test name="UI - Chrome">
         <parameter name="browser" value="chrome"/>
         <packages>
-            <package name="com.framework.tests.ui"/>
+            <package name="com.framework.tests.ui.*"/>
         </packages>
     </test>
 
     <test name="UI - Firefox">
         <parameter name="browser" value="firefox"/>
         <packages>
-            <package name="com.framework.tests.ui"/>
+            <package name="com.framework.tests.ui.*"/>
         </packages>
     </test>
 
     <test name="UI - Edge">
         <parameter name="browser" value="edge"/>
         <packages>
-            <package name="com.framework.tests.ui"/>
+            <package name="com.framework.tests.ui.*"/>
         </packages>
     </test>
 

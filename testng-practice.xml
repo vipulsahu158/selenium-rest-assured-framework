@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 
-<!-- Single-browser UI run: mvn test -DsuiteXmlFile=testng-ui-chrome.xml -Dheadless=true -->
-<suite name="UI Suite - Chrome" data-provider-thread-count="4">
+<!-- Practice-site UI scenarios only, Chrome: mvn test -DsuiteXmlFile=testng-practice.xml -Dheadless=true -->
+<suite name="UI Practice Suite - Chrome" parallel="classes" thread-count="3" data-provider-thread-count="3">
     <listeners>
         <listener class-name="com.framework.listeners.TestListener"/>
         <listener class-name="com.framework.listeners.RetryTransformer"/>
     </listeners>
-    <test name="UI - Chrome">
+    <test name="UI Practice - Chrome">
         <parameter name="browser" value="chrome"/>
         <packages>
-            <package name="com.framework.tests.ui.*"/>
+            <package name="com.framework.tests.ui.practice"/>
         </packages>
     </test>
 </suite>

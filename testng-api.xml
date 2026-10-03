@@ -5,6 +5,7 @@
 <suite name="API Suite" data-provider-thread-count="5">
     <listeners>
         <listener class-name="com.framework.listeners.TestListener"/>
+        <listener class-name="com.framework.listeners.RetryTransformer"/>
     </listeners>
     <test name="API Tests">
         <packages>

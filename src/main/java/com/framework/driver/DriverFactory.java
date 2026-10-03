@@ -1,6 +1,7 @@
 package com.framework.driver;
 
 import com.framework.config.ConfigReader;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -8,6 +9,7 @@ import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.AbstractDriverOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 import java.net.MalformedURLException;
@@ -35,6 +37,7 @@ public final class DriverFactory {
         switch (name.toLowerCase()) {
             case "chrome": {
                 ChromeOptions options = new ChromeOptions();
+                applyLoadStrategy(options);
                 if (headless) {
                     options.addArguments("--headless=new");
                 }
@@ -50,6 +53,7 @@ public final class DriverFactory {
             }
             case "firefox": {
                 FirefoxOptions options = new FirefoxOptions();
+                applyLoadStrategy(options);
                 if (headless) {
                     options.addArguments("-headless");
                 }
@@ -59,6 +63,7 @@ public final class DriverFactory {
             }
             case "edge": {
                 EdgeOptions options = new EdgeOptions();
+                applyLoadStrategy(options);
                 if (headless) {
                     options.addArguments("--headless=new");
                 }
@@ -76,6 +81,15 @@ public final class DriverFactory {
             driver.manage().window().maximize();
         }
         return driver;
+    }
+
+    /**
+     * "eager" returns once the DOM is ready instead of waiting for every image, font and ad on the page.
+     * Slow third-party resources otherwise stall driver.get(); all page objects use explicit waits anyway.
+     */
+    private static void applyLoadStrategy(AbstractDriverOptions<?> options) {
+        String strategy = ConfigReader.get("page.load.strategy", "eager").toLowerCase();
+        options.setPageLoadStrategy(PageLoadStrategy.valueOf(strategy.toUpperCase()));
     }
 
     private static WebDriver remote(String gridUrl, org.openqa.selenium.Capabilities capabilities) {

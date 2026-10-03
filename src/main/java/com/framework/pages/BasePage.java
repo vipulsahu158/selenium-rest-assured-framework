@@ -3,8 +3,10 @@ package com.framework.pages;
 import com.framework.config.ConfigReader;
 import com.framework.reports.ExtentTestManager;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -46,6 +48,25 @@ public abstract class BasePage {
         if (text != null && !text.isEmpty()) {
             element.sendKeys(text);
         }
+    }
+
+    protected void hover(WebElement element, String description) {
+        ExtentTestManager.log("Hover over " + description);
+        new Actions(driver).moveToElement(element).perform();
+    }
+
+    protected void rightClick(By locator, String description) {
+        ExtentTestManager.log("Right-click " + description);
+        new Actions(driver).contextClick(waitVisible(locator)).perform();
+    }
+
+    protected Object js(String script, Object... args) {
+        return ((JavascriptExecutor) driver).executeScript(script, args);
+    }
+
+    protected void scrollToBottom() {
+        ExtentTestManager.log("Scroll to the bottom of the page");
+        js("window.scrollTo(0, document.body.scrollHeight)");
     }
 
     protected String getText(By locator) {
