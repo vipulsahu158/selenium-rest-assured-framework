@@ -1,0 +1,8 @@
+target/
+reports/
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
