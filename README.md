@@ -2,8 +2,8 @@
 
 Java 17 · Maven · TestNG · Selenium 4 · Rest Assured · Apache POI · ExtentReports
 
-UI tests run against https://www.saucedemo.com and API tests against https://jsonplaceholder.typicode.com
-(both public demo sites). Change the URLs in `src/main/resources/config.properties` to point at your own app.
+UI tests run against https://www.saucedemo.com. API tests run against two free public APIs:
+https://jsonplaceholder.typicode.com (fake writes) and https://restful-booker.herokuapp.com (really stores data). Change the URLs in `src/main/resources/config.properties` to point at your own app.
 
 ## Requirements
 - JDK 17+ and Maven 3.8+
@@ -34,6 +34,7 @@ src/main/java/com/framework
   pages/LoginPage, InventoryPage      page objects (one class per page)
   api/ApiClient              Rest Assured wrapper (GET/POST/PUT/PATCH/DELETE)
   api/ExtentRestAssuredFilter  logs every request/response into the report
+  api/models/Post, Booking, BookingDates   request/response bodies as Java records (Jackson)
   utils/ExcelUtils           sheet -> List<Map<header,value>>
   utils/ScreenshotUtils      base64 + PNG file
   listeners/TestListener     report entries, screenshot on failure
@@ -41,7 +42,9 @@ src/main/java/com/framework
 src/test/java/com/framework
   dataproviders/DataProviders   one provider per Excel sheet
   tests/ui/BaseTest, LoginTests, CartTests
-  tests/api/PostsApiTests
+  tests/api/PostsApiTests        JSONPlaceholder: GET (list, by id, query param, nested, 404), POST, PUT, PATCH, DELETE
+  tests/api/BookingApiTests      Restful Booker end-to-end CRUD: auth token -> create -> read -> search -> PUT -> PATCH -> DELETE
+  tests/api/ExcelDrivenApiTests  one test per row of the ApiData sheet
 src/test/resources/testdata/TestData.xlsx    LoginData, CartData, ApiData sheets
 testng.xml                   cross-browser parallel suite
 ```
@@ -62,6 +65,19 @@ testng.xml                   cross-browser parallel suite
 - `Run` column: set to `N` to skip a row.
 - Sheet names: `LoginData`, `CartData`, `ApiData` (see `DataProviders`).
 - API rows: `Method, Endpoint, RequestBody, ExpectedStatus, ExpectedField (JSON path), ExpectedValue`.
+
+## API tests
+
+| Class | API | Covers |
+|---|---|---|
+| `PostsApiTests` | JSONPlaceholder | GET all / by id / `?userId=` / `/posts/1/comments` / 404, POST, PUT, PATCH, DELETE. Writes are faked by the server, so each test checks its own response |
+| `BookingApiTests` | Restful Booker | `POST /auth` token (+ bad credentials), POST, GET, GET search, PUT, PATCH, DELETE then GET 404, PUT without token returns 403. Tests are chained with `dependsOnMethods` and share the created booking |
+| `ExcelDrivenApiTests` | JSONPlaceholder | Rows of the `ApiData` sheet |
+
+Write a new API test with `ApiClient.request()` (default API) or `ApiClient.request(baseUri)` and the usual
+Rest Assured calls, e.g. `ApiClient.request(url).cookie("token", token).body(booking).put("/booking/" + id)`.
+Bodies can be JSON strings, `Map`s or POJOs/records. Restful Booker quirks the tests account for: a successful
+DELETE returns `201`, bad credentials return `200` with `{"reason":"Bad credentials"}`.
 
 ## Extending
 - New page: extend `BasePage`, add a test class that extends `BaseTest`.

@@ -24,8 +24,10 @@ public class ExtentRestAssuredFilter implements Filter {
         ExtentTest test = ExtentTestManager.getTest();
         if (test != null) {
             test.info("Request: " + request.getMethod() + " " + request.getURI());
-            if (request.getBody() != null) {
-                test.info(MarkupHelper.createCodeBlock(String.valueOf(request.getBody()), CodeLanguage.JSON));
+            // getBody() is generic: passing it straight to String.valueOf picks the char[] overload and throws
+            Object requestBody = request.getBody();
+            if (requestBody != null) {
+                test.info(MarkupHelper.createCodeBlock(requestBody.toString(), CodeLanguage.JSON));
             }
             test.info("Response: " + response.getStatusLine() + " (" + response.getTime() + " ms)");
             String body = response.getBody().asString();
